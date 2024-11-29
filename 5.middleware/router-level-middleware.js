@@ -2,16 +2,28 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 
-// Router-level middleware
 router.use((req, res, next) => {
-  console.log('Router middleware triggered');
+  console.log(`Date/Time: ${new Date(Date.now()).toLocaleString()}`);
   next();
 });
 
-router.get('/users', (req, res) => {
-  res.send('User List');
+router.use('/user/:id', (req, res, next) => {
+  console.log(`URL:, ${req.originalUrl} Type: ${req.method}`);
+  next();
 });
 
-app.use('/api', router);
+router.get('/user/:id', (req, res, next) => {
+  // if the user ID is 0, skip to the next router
+  if (req.params.id === '0') next('Id is equal to zero');
+  else next();
+});
+router.get('/user/:id', (req, res, next) => {
+  console.log(req.params.id);
+  res.send({ success: true });
+});
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+app.use('/', router);
+
+app.listen(3000, () => {
+  console.log(`Server is running on port at ${3000}`);
+});
