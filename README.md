@@ -211,6 +211,7 @@ app.listen(3000, () => {
 ```
 
 #### Third-Party Middleware
+
 `rate-limiter-flexible`
 
 ```JavaScript
@@ -236,6 +237,7 @@ app.listen(3000, () => console.log('Server running on port 3000'));
 ```
 
 #### Error-Handling Middleware
+
 `rate-limiter-flexible`
 
 ```JavaScript
@@ -253,7 +255,7 @@ app.get('/error', (req, res, next) => {
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
-    stack: process.env.NODE_ENV === 'production' ? '' : err.stack, 
+    stack: process.env.NODE_ENV === 'production' ? '' : err.stack,
   });
 });
 
@@ -262,4 +264,71 @@ app.listen(3000, () => console.log('Server running on port 3000'));
 
 **_`Summary:`_** Middleware is the foundation for building robust, flexible, scalable and maintainable Express.js applications, providing the backbone for handling requests, responses, and application logic.
 
+### Error Handling
 
+Error handling in Express.js refers to managing runtime errors that occur during the request-response lifecycle, whether synchronously or asynchronously. Custom error handlers in Express.js use middleware functions with four parameters: `err`, `req`, `res`, and `next`. These handlers allow developers to _catch errors_, _log them_, and _send appropriate responses_ to clients.
+
+#### Types of Error-handler
+
+- Invalid JSON Payloads
+- Custom Error Classes
+- Error Handling with Asynchronous Code
+- Customizing Error Responses
+- Centralized Error Handling
+
+#### Basic Error Handling with 404 Errors
+
+```JavaScript
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res, next) => {
+  const error = new Error('Something went wrong!');
+  next(error); // Pass the error to the error-handling middleware
+});
+
+/* status 404 is not an error. this an error from user */
+// 404 error handle
+app.use((req, res, next) => {
+  const error = new Error('Request url was not found!');
+  error.status = 404;
+  next(error);
+});
+
+// Error-handling middleware
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+  });
+});
+
+app.listen(3000, () => {
+  console.log(`Server is running on port at ${3000}`);
+});
+```
+
+#### Invalid JSON Payloads
+
+```JavaScript
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/', (req, res, next) => {
+  res.send({success: true})
+});
+
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ message: 'Invalid JSON payload' });
+  }
+  next(err); // Pass other errors to the generic error handler
+});
+
+app.listen(3000, () => {
+    console.log('Server is running on port at 3000')
+})
+
+```
+
+**_`Summary:`_** Error handling in Express.js involves using middleware to manage, log, and respond to errors in a consistent and centralized manner. By defining custom error handlers and leveraging tools like asynchronous helpers, you can build robust applications capable of gracefully handling unexpected scenarios.

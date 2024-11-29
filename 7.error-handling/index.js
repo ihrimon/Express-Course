@@ -1,29 +1,26 @@
 const express = require('express');
 const app = express();
 
-app.get('/', (req, res) => {
-    res.send(a)
+app.get('/', (req, res, next) => {
+  const error = new Error('Something went wrong!');
+  next(error); // Pass the error to the error-handling middleware
 });
 
-// 404 error handling
+// 404 error handle
 app.use((req, res, next) => {
-    next('Request url was not found!')
-})
+  const error = new Error('Request url was not found!');
+  error.status = 404;
+  next(error);
+});
 
-// invisible defautl error handling middleware as last middleware
+// Error-handling middleware
 app.use((err, req, res, next) => {
-    if(err.message) {
-        res.status(500).send(err.message);
-    }else {
-        res.status(500).send('There was an error!')
-    }
-})
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+  });
+});
 
 app.listen(3000, () => {
-    console.log(`Server is running on port at ${3000}`)
-})
+  console.log(`Server is running on port at ${3000}`);
+});
 
-/** status 404 is not an error. this error from user */
-
-
-/** RULE: response er header ekta client e multiple time send kora jai nah */

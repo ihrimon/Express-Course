@@ -1,18 +1,16 @@
 const express = require('express');
 const app = express();
 
-// app.use(express.static(`${__dirname}/public`, {
-//     index: 'home.html'
-// }));
+// Middleware to add a custom method to the req object
+app.use((req, res, next) => {
+  req.getUserAgent = function () {
+    return req.headers['user-agent'];
+  };
+  next();
+});
 
-// app.get('/', (req, res) => {
-//   res.send('This is home page');
-// });
+app.get('/', (req, res) => {
+  res.send(`Your User-Agent is: ${req.getUserAgent()}`);
+});
 
-// app.post('/', (req, res) => {
-//   res.send('Home page with post request');
-// });
-
-// app.listen(5000, () => {
-//   console.log(`server is running on port at 5000`);
-// });
+app.listen(3000, () => console.log('Server running on http://localhost:3000'));
